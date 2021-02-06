@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import './index.css'
 // 优化
 
-// 在游戏历史记录列表显示每一步棋的坐标，格式为 (列号, 行号)。
+// 在游戏历史记录列表显示每一步棋的坐标，格式为 (列号, 行号) ok。
 // 在历史记录列表中加粗显示当前选择的项目。
 // 使用两个循环来渲染出棋盘的格子，而不是在代码里写死（hardcode）。
 // 添加一个可以升序或降序显示历史记录的按钮。
@@ -52,7 +52,9 @@ import './index.css'
     // }
     renderSquare(i) {
       return <Square value={this.props.squares[i]} 
-                 onClick={()=> this.props.onClick(i) }
+                 onClick={()=> {
+                   this.props.onClick(i)
+                  } }
                  />;
     }
 
@@ -85,14 +87,17 @@ import './index.css'
       super(props);
       this.state = {
         history:[{
-          squares:Array(9).fill(null)
+          squares:Array(9).fill(null),
+          position:{x:null,y:null} // 坐标
         }],
         xIsNext:true,
-        stepNumber:0
+        stepNumber:0,
+       
       }
     }
 
     handleClick(i){
+     
       const history = this.state.history.splice(0,this.state.stepNumber+1)
       const current = history[history.length -1]
 
@@ -103,10 +108,15 @@ import './index.css'
       
       this.setState({
         history:history.concat([{
-          squares:squares
+          squares:squares,
+          position:{
+            x:(i>0?i:1-1)%3,
+            y:parseInt(i/3)
+          }
         }]),
         stepNumber:history.length,
-        xIsNext:!this.state.xIsNext
+        xIsNext:!this.state.xIsNext,
+        
       })
     }
     jumpTo(step){
@@ -121,11 +131,13 @@ import './index.css'
       const history = this.state.history
       const current = history[this.state.stepNumber]
       const winner = calculateWinner(current.squares)
-
+// 添加定位 
       const moves = history.map((setp,move) => {
-        const desc = move?'Go to move #'+ move: 'Go to game start';
+        let position = setp.position.x+'，'+setp.position.y+'）'
+
+        const desc = move?'Go to move #'+ move +'坐标是（'+position: 'Go to game start';
         return (
-          <li key={move}>
+          <li key={move} className="bold">
             <button onClick={()=> this.jumpTo(move)}>{desc}</button>
           </li>
         )
